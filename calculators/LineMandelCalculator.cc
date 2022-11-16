@@ -36,13 +36,13 @@ LineMandelCalculator::~LineMandelCalculator() {
 int *LineMandelCalculator::calculateMandelbrot()
 {
 	int *pdata = data;
-	for (int i = 0; i < height; i++) {
+	for (int i = 0; i < (int)height/2-0.5; i++) {
 		float y = y_start + i * dy; // current imaginary value
 		float *xNew = xData;
 		float *yNew = yData;
 		for (int w = 0; w < width; w++) {
 			pdata[i*width+w] = limit;
-			xNew[w] = x_start + w * dx; // current real value;
+			xNew[w] = x_start + w * dx; // current real value
 			yNew[w] = y;
 		}
 		int cnt = width;
@@ -50,17 +50,17 @@ int *LineMandelCalculator::calculateMandelbrot()
 			cnt = 0;
 			#pragma omp simd reduction(+:cnt)
             for (int j = 0; j < width; j++) {
-                float x = x_start + j * dx; // current real value
-                float r2 = xNew[j] * xNew[j];
-                float i2 = yNew[j] * yNew[j];
+				float x = x_start + j * dx; // current real value
+				float r2 = xNew[j] * xNew[j];
+				float i2 = yNew[j] * yNew[j];
 				bool is_limit;
 				int res = limit;
 				pdata[i*width+j] == limit ? is_limit = true : is_limit = false;
-                pdata[i*width+j] = (is_limit && r2 + i2 > 4.0f) ? it : pdata[i*width+j];
+				pdata[i*width+j] = (is_limit && r2 + i2 > 4.0f) ? it : pdata[i*width+j];
+				pdata[(height-i-1)*width+j] = (height % 2 == 1 && i == (int)height/2-0.5) ? pdata[(height-i-1)*width+j] : pdata[i*width+j];
 				cnt += is_limit;
-				// pdata[i*width+j] = res;
 				yNew[j] = 2.0f * xNew[j] * yNew[j] + y;
-                xNew[j] = r2 - i2 + x;
+				xNew[j] = r2 - i2 + x;
             }
 		}
 	}
