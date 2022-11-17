@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 
 #include <stdlib.h>
 
@@ -36,7 +37,7 @@ LineMandelCalculator::~LineMandelCalculator() {
 int *LineMandelCalculator::calculateMandelbrot()
 {
 	int *pdata = data;
-	for (int i = 0; i < (int)height/2-0.5; i++) {
+	for (int i = 0; i < height/2; i++) {
 		float y = y_start + i * dy; // current imaginary value
 		float *xNew = xData;
 		float *yNew = yData;
@@ -48,7 +49,7 @@ int *LineMandelCalculator::calculateMandelbrot()
 		int cnt = width;
 		for (int it = 0; it < limit && cnt != 0; ++it) {
 			cnt = 0;
-			#pragma omp simd reduction(+:cnt)
+			#pragma omp simd early_exit reduction(+:cnt)
             for (int j = 0; j < width; j++) {
 				float x = x_start + j * dx; // current real value
 				float r2 = xNew[j] * xNew[j];
@@ -57,12 +58,12 @@ int *LineMandelCalculator::calculateMandelbrot()
 				int res = limit;
 				pdata[i*width+j] == limit ? is_limit = true : is_limit = false;
 				pdata[i*width+j] = (is_limit && r2 + i2 > 4.0f) ? it : pdata[i*width+j];
-				pdata[(height-i-1)*width+j] = (height % 2 == 1 && i == (int)height/2-0.5) ? pdata[(height-i-1)*width+j] : pdata[i*width+j];
 				cnt += is_limit;
 				yNew[j] = 2.0f * xNew[j] * yNew[j] + y;
 				xNew[j] = r2 - i2 + x;
             }
 		}
+		std::memcpy(&pdata[(height-i-1)*width], &pdata[i*width], width*(sizeof(int)));
 	}
 	return data;
 }
