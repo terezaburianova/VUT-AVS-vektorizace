@@ -20,6 +20,7 @@ private:
     int *data;
     float *xData;
     float *yData;
+    int tile;
 };
 
 #endif
