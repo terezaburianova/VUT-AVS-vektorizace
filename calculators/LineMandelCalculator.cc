@@ -41,6 +41,7 @@ int *LineMandelCalculator::calculateMandelbrot()
 		float y = y_start + i * dy; // current imaginary value
 		float *xNew = xData;
 		float *yNew = yData;
+		#pragma omp simd aligned(pdata, xNew, yNew: 64)
 		for (int w = 0; w < width; w++) {
 			pdata[i*width+w] = limit;
 			xNew[w] = x_start + w * dx; // current real value

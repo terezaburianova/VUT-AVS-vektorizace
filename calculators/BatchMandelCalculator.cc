@@ -41,12 +41,13 @@ int * BatchMandelCalculator::calculateMandelbrot () {
 		float y = y_start + i * dy; // current imaginary value
 		float *xNew = xData;
 		float *yNew = yData;
+		#pragma omp simd aligned(pdata: 64)
 		for (int w = 0; w < width; w++) {
 			pdata[i*width+w] = limit;
 		}
-		// #pragma omp simd linear(start:tile)
 		for (int tiles = 0; tiles < width/tile; tiles++) {
 			start = tile * tiles;
+			#pragma omp simd aligned(xNew, yNew: 64)
 			for (int t = start; t < start + tile; t++) {
 				xNew[t-start] = x_start + t * dx; // current real value
 				yNew[t-start] = y;
