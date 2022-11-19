@@ -1,0 +1,32 @@
+#### Stručně odpovězte na následující otázky: ######
+
+1. Proč je nutné určovat, zda má výpočet pokračovat?
+V případě, že již byla překročena prahová hodnota, bude tato hodnota dále stoupat a není tedy třeba ji dále počítat. Pokud byl výpočet dokončen pro všechna čísla z daného řádku/skupiny, hodnoty se už nezmění, další průběh cyklu by tedy byl zbytečný a výpočet by příliš zpomalil.
+==============================================================================
+
+
+2. Byla "Line" vektorizace efektivní? Proč?
+Byla efektivnější, než kód bez jakékoliv vektorizace, ale oproti "Batch" vektorizaci byla méně efektivní. Hlavní rozdíl spočívá ve využití cache. Dlouhé smyčky, které se využívají v implementaci Line, způsobují mnoho cache výpadků, ať už z důvodu kapacity, nebo z důvodu kolizí. Rozbití smyčky na více menších smyček, jak tomu je v implementaci Batch, toto omezují.
+==============================================================================
+
+
+3. Jaká byla dosažena výkonnost v Intel Advisoru pro jednotlivé implementace (v GFLOPS)?
+Line: 40.8 GFLOPS v roofline, 27.9 GFLOPS v summary
+Batch: 39 GFLOPS v roofline, 20 GFLOPS v summary
+Nejsem si jistá, zda je tato výkonnost správná, neboť jsem pragmy používala u více smyček (příprava dat, hlavní smyčka) a hlavní smyčka se v roofline nezobrazuje (je pouze informace v source kódu u smyčky o úroveň výš, že vektorizovaná není, neboť už je úspěšně vektorizovaná smyčka vnitřní, u které se ale další informace nezobrazují). Bohužel jsem nepřišla na to, zda to tak je správně, nebo je někde chyba.
+
+==============================================================================
+
+
+4. Jaká část kódu byla vektorizována v "Line" implementaci? Vyčteme tuto 
+informaci i u batch kalkulátoru?
+Symčky, u kterých byla použita pragma a splnily všechny podmínky pro to, aby mohly být vektorizovány (v mém případě smyčky pro přípravu dat a hlavní smyčka pro výpočet jednotlivých hodnot). Tuto informaci vidím u obou implementací.
+==============================================================================
+
+
+5. Co vyčteme z Roofline modelu pro obě vektorizované implementace?
+Výkon implementací: aritmetickou intenzitu, propustnost paměti a výpočetní výkon. Lze z něj zjistit, čím je implementace omezena (například, zda efektivně pracuje s RAM, L1 cache, nebo zda ji brzdí procesor...).
+==============================================================================
+
+
+
