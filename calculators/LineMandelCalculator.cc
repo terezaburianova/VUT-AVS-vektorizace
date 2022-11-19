@@ -19,9 +19,9 @@
 LineMandelCalculator::LineMandelCalculator (unsigned matrixBaseSize, unsigned limit) :
 	BaseMandelCalculator(matrixBaseSize, limit, "LineMandelCalculator")
 {
-	data = (int *)(malloc(height * width * sizeof(int)));
-	xData = (float *)(malloc(width * sizeof(float)));
-	yData = (float *)(malloc(width * sizeof(float)));
+	data = (int *)(aligned_alloc(64, height * width * sizeof(int)));
+	xData = (float *)(aligned_alloc(64, width * sizeof(float)));
+	yData = (float *)(aligned_alloc(64, width * sizeof(float)));
 }
 
 LineMandelCalculator::~LineMandelCalculator() {
@@ -49,13 +49,12 @@ int *LineMandelCalculator::calculateMandelbrot()
 		int cnt = width;
 		for (int it = 0; it < limit && cnt != 0; ++it) {
 			cnt = 0;
-			#pragma omp simd early_exit reduction(+:cnt)
+			#pragma omp simd early_exit reduction(+:cnt) aligned(pdata, xNew, yNew: 64)
             for (int j = 0; j < width; j++) {
 				float x = x_start + j * dx; // current real value
 				float r2 = xNew[j] * xNew[j];
 				float i2 = yNew[j] * yNew[j];
 				bool is_limit;
-				int res = limit;
 				pdata[i*width+j] == limit ? is_limit = true : is_limit = false;
 				pdata[i*width+j] = (is_limit && r2 + i2 > 4.0f) ? it : pdata[i*width+j];
 				cnt += is_limit;
